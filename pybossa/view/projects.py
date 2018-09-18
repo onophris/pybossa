@@ -129,6 +129,7 @@ def sanitize_project_owner(project, owner, current_user, ps=None):
     if current_user.is_authenticated() and owner.id == current_user.id:
         if isinstance(project, Project):
             project_sanitized = project.dictize()   # Project object
+            project_sanitized['info'] = dict(**project_sanitized['info'])
         else:
             project_sanitized = project             # dict object
         owner_sanitized = cached_users.get_user_summary(owner.name)
@@ -136,6 +137,7 @@ def sanitize_project_owner(project, owner, current_user, ps=None):
         if request.headers.get('Content-Type') == 'application/json':
             if isinstance(project, Project):
                 project_sanitized = project.to_public_json()            # Project object
+                project_sanitized['info'] = dict(**project_sanitized['info'])
             else:
                 project_sanitized = Project().to_public_json(project)   # dict object
         else:    # HTML
@@ -145,6 +147,11 @@ def sanitize_project_owner(project, owner, current_user, ps=None):
             else:
                 project_sanitized = project             # dict object
         owner_sanitized = cached_users.public_get_user_summary(owner.name)
+
+    owner_sanitized.pop('api_key', None)
+    project_sanitized['info'].pop('passwd_hash', None)
+    project_sanitized.pop('secret_key', None)
+
     if ps:
         project_sanitized['n_tasks'] = ps.n_tasks
         project_sanitized['n_task_runs'] = ps.n_tasks
