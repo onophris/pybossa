@@ -95,6 +95,7 @@ def ratelimit(limit, per, send_x_headers=True,
         def rate_limited(*args, **kwargs):
             try:
                 key = 'rate-limit/%s/%s/' % (key_func(), scope_func())
+                current_app.logger.info('*** rate limit key: %s', key)
                 rlimit = RateLimit(key, limit, per, send_x_headers)
                 g._view_rate_limit = rlimit
                 # if over_limit is not None and rlimit.over_limit:
